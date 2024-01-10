@@ -141,6 +141,10 @@ impl<F: RealField + Float> LevenbergMarquardt<F> {
         }
     }
 
+    pub fn ftol(&self) -> F {
+        self.ftol
+    }
+
     /// Set the relative error desired in the objective function `$f$`.
     ///
     /// Termination occurs when both the actual and
@@ -155,6 +159,10 @@ impl<F: RealField + Float> LevenbergMarquardt<F> {
         Self { ftol, ..self }
     }
 
+    pub fn xtol(&self) -> F {
+        self.xtol
+    }
+
     /// Set relative error between last two approximations.
     ///
     /// Termination occurs when the relative error between
@@ -167,6 +175,10 @@ impl<F: RealField + Float> LevenbergMarquardt<F> {
     pub fn with_xtol(self, xtol: F) -> Self {
         assert!(!xtol.is_negative(), "xtol must be >= 0");
         Self { xtol, ..self }
+    }
+
+    pub fn gtol(&self) -> F {
+        self.gtol
     }
 
     /// Set orthogonality desired between the residual vector and its derivative.
@@ -213,6 +225,10 @@ impl<F: RealField + Float> LevenbergMarquardt<F> {
         }
     }
 
+    pub fn stepbound(&self) -> F {
+        self.stepbound
+    }
+
     /// Set factor for the initial step bound.
     ///
     /// This bound is set to `$\mathtt{stepbound}\cdot\|\mathbf{D}\vec{x}\|$`
@@ -228,6 +244,10 @@ impl<F: RealField + Float> LevenbergMarquardt<F> {
         Self { stepbound, ..self }
     }
 
+    pub fn patience(&self) -> usize {
+        self.patience
+    }
+
     /// Set factor for the maximal number of function evaluations.
     ///
     /// The maximal number of function evaluations is set to
@@ -240,6 +260,10 @@ impl<F: RealField + Float> LevenbergMarquardt<F> {
     pub fn with_patience(self, patience: usize) -> Self {
         assert!(patience > 0, "patience must be > 0");
         Self { patience, ..self }
+    }
+
+    pub fn scale_diag(&self) -> bool {
+        self.scale_diag
     }
 
     /// Enable or disable whether the variables will be rescaled internally.
