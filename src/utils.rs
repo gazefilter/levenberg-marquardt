@@ -57,7 +57,7 @@ cfg_if::cfg_if! {
 /// For example:
 ///
 /// ```rust
-/// # use levenberg_marquardt::{LeastSquaresProblem, differentiate_numerically};
+/// # use gazefilter_levenberg_marquardt::{LeastSquaresProblem, differentiate_numerically};
 /// # use approx::assert_relative_eq;
 /// # use nalgebra::{convert, ComplexField, storage::Owned, Matrix2, Vector2, OVector, U2};
 /// #
@@ -154,7 +154,7 @@ where
 /// # Example
 ///
 /// ```rust
-/// # use levenberg_marquardt::{LeastSquaresProblem, differentiate_holomorphic_numerically};
+/// # use gazefilter_levenberg_marquardt::{LeastSquaresProblem, differentiate_holomorphic_numerically};
 /// # use approx::assert_relative_eq;
 /// # use nalgebra::{storage::Owned, Complex, Matrix2, Vector2, OVector, U2};
 /// use nalgebra::{ComplexField, convert};

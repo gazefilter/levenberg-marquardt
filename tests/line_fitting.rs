@@ -1,5 +1,5 @@
 use arrsac::Arrsac;
-use levenberg_marquardt::{LeastSquaresProblem, LevenbergMarquardt};
+use gazefilter_levenberg_marquardt::{LeastSquaresProblem, LevenbergMarquardt};
 use nalgebra::{
     Dim, Dyn, Matrix, Matrix2, OMatrix, VecStorage, Vector2,
     dimension::{U1, U2},

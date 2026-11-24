@@ -51,7 +51,7 @@
 //! ```
 //! # use nalgebra::*;
 //! # use nalgebra::storage::Owned;
-//! # use levenberg_marquardt::{LeastSquaresProblem, LevenbergMarquardt};
+//! # use gazefilter_levenberg_marquardt::{LeastSquaresProblem, LevenbergMarquardt};
 //! struct ExampleProblem {
 //!     // holds current value of the n parameters
 //!     p: Vector2<f64>,

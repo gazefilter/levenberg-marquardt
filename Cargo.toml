@@ -1,6 +1,6 @@
 [package]
-name = "levenberg-marquardt"
-version = "0.15.0"
+name = "gazefilter-levenberg-marquardt"
+version = "0.1.0"
 authors = [
     "Jannik Schürg <schuerg@ins.uni-bonn.de>",
     "Geordon Worley <vadixidav@gmail.com>",
@@ -15,8 +15,8 @@ categories = [
     "no-std",
     "mathematics",
 ]
-repository = "https://github.com/rust-cv/levenberg-marquardt"
-documentation = "https://docs.rs/levenberg-marquardt/"
+repository = "https://github.com/gazefilter/levenberg-marquardt"
+documentation = "https://docs.rs/gazefilter-levenberg-marquardt/"
 license = "MIT"
 readme = "README.md"
 
