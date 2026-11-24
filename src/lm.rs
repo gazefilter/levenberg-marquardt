@@ -1,10 +1,11 @@
-use crate::qr::{LinearLeastSquaresDiagonalProblem, PivotedQR};
-use crate::trust_region::{determine_lambda_and_parameter_update, LMParameter};
-use crate::utils::{enorm, epsmch};
 use crate::LeastSquaresProblem;
+use crate::qr::{LinearLeastSquaresDiagonalProblem, PivotedQR};
+use crate::trust_region::{LMParameter, determine_lambda_and_parameter_update};
+use crate::utils::{enorm, epsmch};
 use nalgebra::{
+    DefaultAllocator, Dim, DimMax, DimMaximum, DimMin, Matrix, OVector, RealField, Vector,
     allocator::{Allocator, Reallocator},
-    convert, DefaultAllocator, Dim, DimMax, DimMaximum, DimMin, Matrix, OVector, RealField, Vector,
+    convert,
 };
 use num_traits::Float;
 
@@ -281,8 +282,7 @@ impl<F: RealField + Float> LevenbergMarquardt<F> {
         N: Dim,
         M: DimMin<N> + DimMax<N>,
         O: LeastSquaresProblem<F, M, N>,
-        DefaultAllocator:
-            Allocator<F, N> + Reallocator<F, M, N, DimMaximum<M, N>, N> + Allocator<usize, N>,
+        DefaultAllocator: Allocator<N> + Reallocator<F, M, N, DimMaximum<M, N>, N>,
     {
         let (mut lm, mut residuals) = match LM::new(self, target) {
             Err(report) => return report,
@@ -290,7 +290,7 @@ impl<F: RealField + Float> LevenbergMarquardt<F> {
         };
         let n = lm.x.nrows();
         loop {
-            // Build linear least squaress problem used for the trust-region subproblem
+            // Build linear least squares problem used for the trust-region subproblem
             let mut lls = {
                 let jacobian = match lm.jacobian() {
                     Err(reason) => return lm.into_report(reason),
@@ -333,7 +333,7 @@ where
     N: Dim,
     M: DimMin<N> + DimMax<N>,
     O: LeastSquaresProblem<F, M, N>,
-    DefaultAllocator: Allocator<F, N> + Allocator<F, DimMaximum<M, N>, N>,
+    DefaultAllocator: Allocator<N> + Allocator<DimMaximum<M, N>, N>,
 {
     config: &'a LevenbergMarquardt<F>,
     /// Current parameters `$\vec{x}$`
@@ -366,7 +366,7 @@ where
     N: Dim,
     M: DimMin<N> + DimMax<N>,
     O: LeastSquaresProblem<F, M, N>,
-    DefaultAllocator: Allocator<F, N> + Allocator<F, DimMaximum<M, N>, N>,
+    DefaultAllocator: Allocator<N> + Allocator<DimMaximum<M, N>, N>,
 {
     #[allow(clippy::type_complexity)]
     fn new(
@@ -479,13 +479,13 @@ where
         lls: &mut LinearLeastSquaresDiagonalProblem<F, M, N>,
     ) -> Result<(), TerminationReason>
     where
-        DefaultAllocator: Allocator<usize, N>,
+        DefaultAllocator: Allocator<N>,
     {
         // Compute norm of scaled gradient and detect degeneracy
         self.gnorm = match lls.max_a_t_b_scaled(self.residuals_norm) {
             Some(max_at_b) => max_at_b,
             None if !cfg!(feature = "minpack-compat") => {
-                return Err(TerminationReason::Numerical("jacobian"))
+                return Err(TerminationReason::Numerical("jacobian"));
             }
             None => F::zero(),
         };
@@ -534,7 +534,7 @@ where
         param: LMParameter<F, N>,
     ) -> Result<Option<Vector<F, M, O::ResidualStorage>>, TerminationReason>
     where
-        DefaultAllocator: Allocator<usize, N>,
+        DefaultAllocator: Allocator<N>,
     {
         const P1: f64 = 0.1;
         const P0001: f64 = 1.0e-4;

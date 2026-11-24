@@ -4,14 +4,14 @@
 use crate::qr::LinearLeastSquaresDiagonalProblem;
 use crate::utils::{dwarf, enorm};
 use nalgebra::{
-    allocator::Allocator, convert, DefaultAllocator, Dim, DimMax, DimMaximum, DimMin, OVector,
-    RealField,
+    DefaultAllocator, Dim, DimMax, DimMaximum, DimMin, OVector, RealField, allocator::Allocator,
+    convert,
 };
 use num_traits::Float;
 
 pub struct LMParameter<F: RealField, N: Dim>
 where
-    DefaultAllocator: Allocator<F, N>,
+    DefaultAllocator: Allocator<N>,
 {
     pub step: OVector<F, N>,
     pub lambda: F,
@@ -59,7 +59,7 @@ where
     F: RealField + Float,
     N: Dim,
     M: Dim + DimMin<N> + DimMax<N>,
-    DefaultAllocator: Allocator<F, N> + Allocator<F, DimMaximum<M, N>, N> + Allocator<usize, N>,
+    DefaultAllocator: Allocator<N> + Allocator<DimMaximum<M, N>, N>,
 {
     const P1: f64 = 0.1;
     debug_assert!(delta.is_positive());

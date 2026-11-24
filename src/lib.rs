@@ -63,12 +63,12 @@
 //!     type ResidualStorage = Owned<f64, U2>;
 //!     type JacobianStorage = Owned<f64, U2, U2>;
 //!     
-//!     fn set_params(&mut self, p: &VectorN<f64, U2>) {
+//!     fn set_params(&mut self, p: &Vector2<f64>) {
 //!         self.p.copy_from(p);
 //!         // do common calculations for residuals and the Jacobian here
 //!     }
 //!     
-//!     fn params(&self) -> VectorN<f64, U2> { self.p }
+//!     fn params(&self) -> Vector2<f64> { self.p }
 //!     
 //!     fn residuals(&self) -> Option<Vector2<f64>> {
 //!         let [x, y] = [self.p.x, self.p.y];
@@ -107,6 +107,7 @@
 //!
 //! You should try using [`differentiate_numerically`](fn.differentiate_numerically.html)
 //! in a unit test to verify that your Jacobian implementation matches the residuals.
+#![allow(unexpected_cfgs)]
 #![no_std]
 #![cfg_attr(feature = "RUSTC_IS_NIGHTLY", core_intrinsics)]
 

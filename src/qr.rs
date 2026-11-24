@@ -9,10 +9,10 @@
 use approx::assert_relative_eq;
 use core::iter::repeat;
 use nalgebra::{
+    DefaultAllocator, Dim, DimMax, DimMaximum, DimMin, Matrix, OMatrix, OVector, Vector,
     allocator::{Allocator, Reallocator},
     convert,
     storage::{IsContiguous, RawStorage, RawStorageMut, Storage},
-    DefaultAllocator, Dim, DimMax, DimMaximum, DimMin, Matrix, OMatrix, OVector, Vector,
 };
 use num_traits::Float;
 
@@ -33,7 +33,7 @@ where
     M: Dim + DimMin<N>,
     N: Dim,
     S: RawStorageMut<F, M, N> + IsContiguous,
-    DefaultAllocator: Allocator<F, N> + Allocator<usize, N>,
+    DefaultAllocator: Allocator<N>,
 {
     /// The column norms of the input matrix `$\mathbf{A}$`
     column_norms: OVector<F, N>,
@@ -54,7 +54,7 @@ where
     M: Dim + DimMin<N> + DimMax<N>,
     N: Dim,
     S: RawStorageMut<F, M, N> + Storage<F, M, N> + IsContiguous,
-    DefaultAllocator: Allocator<F, N> + Allocator<F, DimMaximum<M, N>, N> + Allocator<usize, N>,
+    DefaultAllocator: Allocator<N> + Allocator<DimMaximum<M, N>, N>,
 {
     /// Create a pivoted QR decomposition of a matrix `$\mathbf{A}\in\R^{m\times n}$`.
     pub fn new(mut a: Matrix<F, M, N, S>) -> Self {
@@ -203,7 +203,7 @@ where
     F: nalgebra::RealField + Float + Copy,
     M: Dim + DimMax<N>,
     N: Dim,
-    DefaultAllocator: Allocator<F, N> + Allocator<F, DimMaximum<M, N>, N> + Allocator<usize, N>,
+    DefaultAllocator: Allocator<N> + Allocator<DimMaximum<M, N>, N>,
 {
     /// The first `$n$` entries of `$\mathbf{Q}^\top \vec{b}$`.
     qt_b: OVector<F, N>,
@@ -224,7 +224,7 @@ where
     F: nalgebra::RealField + Copy,
     M: Dim + DimMax<N>,
     N: Dim,
-    DefaultAllocator: Allocator<F, N> + Allocator<F, DimMaximum<M, N>, N> + Allocator<usize, N>,
+    DefaultAllocator: Allocator<N> + Allocator<DimMaximum<M, N>, N>,
 {
     pub permutation: &'a OVector<usize, N>,
     l: &'a OMatrix<F, DimMaximum<M, N>, N>,
@@ -239,7 +239,7 @@ where
     F: nalgebra::RealField + Copy,
     M: Dim + DimMin<N> + DimMax<N>,
     N: Dim,
-    DefaultAllocator: Allocator<F, N> + Allocator<F, DimMaximum<M, N>, N> + Allocator<usize, N>,
+    DefaultAllocator: Allocator<N> + Allocator<DimMaximum<M, N>, N> + Allocator<N>,
 {
     /// Solve the equation `$\mathbf{L}\vec{x} = \mathbf{P}^\top \vec{b}$`.
     pub fn solve(&mut self, mut rhs: OVector<F, N>) -> OVector<F, N> {
@@ -295,7 +295,7 @@ where
     F: nalgebra::RealField + Float + Copy,
     M: Dim + DimMin<N> + DimMax<N>,
     N: Dim,
-    DefaultAllocator: Allocator<F, N> + Allocator<F, DimMaximum<M, N>, N> + Allocator<usize, N>,
+    DefaultAllocator: Allocator<N> + Allocator<DimMaximum<M, N>, N>,
 {
     /// Compute scaled maximum of dot products between `$\vec{b}$` and the columns of `$\mathbf{A}$`.
     ///
@@ -362,7 +362,7 @@ where
         &mut self,
         diag: &OVector<F, N>,
         mut out: OVector<F, N>,
-    ) -> (OVector<F, N>, CholeskyFactor<F, M, N>) {
+    ) -> (OVector<F, N>, CholeskyFactor<'_, F, M, N>) {
         out.copy_from(&self.qt_b);
         let mut rhs = self.eliminate_diag(diag, out /* will be filled and returned */);
         core::mem::swap(&mut self.work, &mut rhs);
@@ -370,7 +370,7 @@ where
     }
 
     /// Solve the least squares problem with a zero diagonal.
-    pub fn solve_with_zero_diagonal(&mut self) -> (OVector<F, N>, CholeskyFactor<F, M, N>) {
+    pub fn solve_with_zero_diagonal(&mut self) -> (OVector<F, N>, CholeskyFactor<'_, F, M, N>) {
         let u1 = Dim::from_usize(1);
         let (_m, n) = self.upper_r.data.shape();
         let l = self.upper_r.rows_generic(0, n);
@@ -420,7 +420,7 @@ where
     fn solve_after_elimination(
         &mut self,
         mut x: OVector<F, N>,
-    ) -> (OVector<F, N>, CholeskyFactor<F, M, N>) {
+    ) -> (OVector<F, N>, CholeskyFactor<'_, F, M, N>) {
         let rank = self.rank();
         let rhs = &mut self.work;
         rhs.rows_range_mut(rank..).fill(F::zero());
@@ -627,7 +627,7 @@ fn test_pivoted_qr_more_branches() {
 #[test]
 fn test_pivoted_qr_big_rank1() {
     // This test case was generated directly from MINPACK's QRFAC
-    use nalgebra::{OMatrix, Vector5, U10, U5};
+    use nalgebra::{OMatrix, U5, U10, Vector5};
     let a = OMatrix::<f64, U10, U5>::from_fn(|i, j| ((i + 1) * (j + 1)) as f64);
     let qr = PivotedQR::new(a);
     let r_diag = Vector5::<f64>::new(-98.107084351742913, -3.9720546451956370E-015, 0., 0., 0.);
@@ -810,7 +810,7 @@ fn test_lls_zero_diagonal() {
 
 #[test]
 fn test_cholesky_lower() {
-    use nalgebra::{Matrix3, Vector3, U3};
+    use nalgebra::{Matrix3, U3, Vector3};
     let l = Matrix3::new(-1.0e10, 100., -1., 1., 1.0e8, 0.5, 1., 0.5, 100.);
     let mut chol = CholeskyFactor::<f64, U3, _> {
         l: &l,
@@ -832,7 +832,7 @@ fn test_cholesky_lower() {
 
 #[test]
 fn test_cholesky_upper() {
-    use nalgebra::{Matrix3, Vector3, U3};
+    use nalgebra::{Matrix3, U3, Vector3};
     let l = Matrix3::new(4., 7., 1., 123., 6., 8., 34., 34455., 9.);
     let mut chol = CholeskyFactor::<f64, U3, _> {
         l: &l,
@@ -854,7 +854,6 @@ fn test_cholesky_upper() {
 
 #[test]
 fn test_column_max_norm() {
-    use ::core::f64::NAN;
     use nalgebra::*;
     let a = Matrix4x3::from_column_slice(&[
         14., -12., 20., -11., 19., 38., -4., -11., -14., 12., -20., 11.,
@@ -867,7 +866,18 @@ fn test_column_max_norm() {
     assert_relative_eq!(max_at_b.unwrap(), 0.88499332, epsilon = 1e-8);
 
     let a = Matrix4x3::from_column_slice(&[
-        NAN, -12., 20., -11., 19., 38., -4., -11., -14., 12., -20., 11.,
+        f64::NAN,
+        -12.,
+        20.,
+        -11.,
+        19.,
+        38.,
+        -4.,
+        -11.,
+        -14.,
+        12.,
+        -20.,
+        11.,
     ]);
     let qr = PivotedQR::new(a);
     let b = Vector4::new(1., 2., 3., 4.);
